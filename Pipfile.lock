@@ -1,0 +1,63 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "d697cf83237ce6aca488b05540f56990a5f461b267fcfb82e60a948255fc6b51"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.6"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {},
+    "develop": {
+        "py4j": {
+            "hashes": [
+                "sha256:721189616b3a7d28212dfb2e7c6a1dd5147b03105f1fc37ff2432acd0e863fa5",
+                "sha256:a950fe7de1bfd247a0a4dddb9118f332d22a89e01e0699135ea8038c15ee1293"
+            ],
+            "version": "==0.10.7"
+        },
+        "pybuilder": {
+            "hashes": [
+                "sha256:3d5c33ebd1028f078cb6bff56ead5eecdb3b3cf32dc3ce6fad99b0bbaa44e65d",
+                "sha256:ea740e0c4794935a401b4f19d67b34c660d6f0147bb135c6918a5c8c563dade9"
+            ],
+            "index": "pypi",
+            "version": "==0.11.17"
+        },
+        "pyspark": {
+            "hashes": [
+                "sha256:27c0e6498f684abcf06d684ffc2d2206352a4731d60fa8b80aeded126e84284f"
+            ],
+            "index": "pypi",
+            "version": "==2.1.3"
+        },
+        "tailer": {
+            "hashes": [
+                "sha256:78d60f23a1b8a2d32f400b3c8c06b01142ac7841b75d8a1efcb33515877ba531"
+            ],
+            "version": "==0.4.1"
+        },
+        "tblib": {
+            "hashes": [
+                "sha256:436e4200e63d92316551179dc540906652878df4ff39b43db30fcf6400444fe7",
+                "sha256:9bae4b8c44b06af0e114bfc4d5f6aa3eafd2119af5a4dcab34f51f1665f16c59"
+            ],
+            "version": "==1.3.2"
+        },
+        "wheel": {
+            "hashes": [
+                "sha256:029703bf514e16c8271c3821806a1c171220cc5bdd325cbf4e7da1e056a01db6",
+                "sha256:1e53cdb3f808d5ccd0df57f964263752aa74ea7359526d3da6c02114ec1e1d44"
+            ],
+            "version": "==0.32.3"
+        }
+    }
+}
