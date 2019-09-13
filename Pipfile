@@ -1,12 +1,13 @@
 [[source]]
 url = "https://pypi.org/simple"
-verify_ssl = true
+verify_ssl = false
 name = "pypi"
 
 [packages]
+pandas = "*"
 
 [dev-packages]
-pyspark = "==2.1.3"
+pyspark = "==2.4.0"
 pybuilder = "*"
 
 [requires]

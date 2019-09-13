@@ -1,14 +1,14 @@
 import os
 import shutil
 import unittest
+import warnings
 from abc import ABC
 from datetime import datetime, date
 
+from pandas.util.testing import assert_frame_equal
+# noinspection PyProtectedMember
 from pyspark import SQLContext
 from pyspark.sql import SparkSession
-
-
-# from pandas.util.testing import assert_frame_equal
 
 
 class SparkleTestCase(unittest.TestCase, ABC):
@@ -18,17 +18,23 @@ class SparkleTestCase(unittest.TestCase, ABC):
         A unique directory is created for each run to store the Hive tables, you can find them under
         'target/warehouse/'. This also holds the derby.log file. Hive meta data is stored in memory.
     """
-    spark = None
 
     @classmethod
     def setUpClass(cls):
+        warnings.simplefilter("ignore", ResourceWarning)  # ignore socket warnings
         cls.spark = cls.createSparkSession(cls.jar_path())
         cls.setup_class()
+
+    def setUp(self):
+        warnings.simplefilter("ignore", ResourceWarning)  # ignore socket warnings
 
     @classmethod
     def setup_class(cls):
         """Override this method for code that should be executed as part of setUpClass"""
         pass
+
+    def tearDown(self):
+        SQLContext(self.spark.sparkContext).clearCache()
 
     @classmethod
     def jar_path(cls) -> str:
@@ -54,7 +60,7 @@ class SparkleTestCase(unittest.TestCase, ABC):
             config("spark.executor.instances", 1). \
             config("spark.sql.shuffle.partitions", 1)
 
-        if jar_path is not None and len(jar_path) > 0:
+        if jar_path and len(jar_path) > 0:
             config = config.config("spark.jars", SparkleTestCase.root(jar_path))
 
         spark = config.enableHiveSupport().getOrCreate()
@@ -97,17 +103,17 @@ class SparkleTestCase(unittest.TestCase, ABC):
         warehouse_tmp_dir = SparkleTestCase.root("target/warehouse/{}".format(timestmp))
         return warehouse_tmp_dir
 
-    # @staticmethod
-    # def assert_frame_equal_with_sort(expected, result, by=None):
-    #     expected = expected.toPandas()
-    #     result = result.toPandas()
-    #     """ Inspired by
-    #     https://blog.cambridgespark.com/unit-testing-with-pyspark-fb31671b1ad8 """
-    #     if by is None:
-    #         by = list(expected.columns)
-    #     results_sorted = result.sort_values(by=by).reset_index(drop=True).sort_index(axis=1)
-    #     expected_sorted = expected.sort_values(by=by).reset_index(drop=True).sort_index(axis=1)
-    #     assert_frame_equal(expected_sorted, results_sorted)
+    @staticmethod
+    def assert_frame_equal_with_sort(expected, result, by=None):
+        expected = expected.toPandas()
+        result = result.toPandas()
+        """ Inspired by
+        https://blog.cambridgespark.com/unit-testing-with-pyspark-fb31671b1ad8 """
+        if by is None:
+            by = list(expected.columns)
+        results_sorted = result.sort_values(by=by).reset_index(drop=True).sort_index(axis=1)
+        expected_sorted = expected.sort_values(by=by).reset_index(drop=True).sort_index(axis=1)
+        assert_frame_equal(expected_sorted, results_sorted)
 
     @staticmethod
     def dd(date_str: str) -> date:

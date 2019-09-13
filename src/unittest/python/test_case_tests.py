@@ -1,13 +1,9 @@
 import pathlib
 
-from sparkle_test_case import SparkleTestCase
+from sparkle_test import SparkleTestCase
 
 
 class SparkleTestCaseTest(SparkleTestCase):
-
-    @classmethod
-    def setup_class(cls):
-        pass
 
     def test_log_file_creation(self):
         df = self.spark.createDataFrame([('Alice', 1)])
