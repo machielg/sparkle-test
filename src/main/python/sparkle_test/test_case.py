@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import unittest
 import warnings
 from abc import ABC
@@ -42,13 +43,10 @@ class SparkleTestCase(unittest.TestCase, ABC):
 
     @staticmethod
     def createSparkSession(jar_path: str = None):
-        import logging
-        s_logger = logging.getLogger('py4j.java_gateway')
-        s_logger.setLevel(logging.ERROR)
 
         warehouse_tmp_dir = SparkleTestCase._create_tmp_warehouse_dir()
 
-        config = SparkSession.builder. \
+        builder = SparkSession.builder. \
             config("spark.hadoop.javax.jdo.option.ConnectionURL",
                    'jdbc:derby:memory:databaseName=metastore_db;create=true'). \
             config("spark.hadoop.javax.jdo.option.ConnectionDriverName", "org.apache.derby.jdbc.EmbeddedDriver"). \
@@ -61,12 +59,11 @@ class SparkleTestCase(unittest.TestCase, ABC):
             config("spark.sql.shuffle.partitions", 1)
 
         if jar_path and len(jar_path) > 0:
-            config = config.config("spark.jars", SparkleTestCase.root(jar_path))
+            builder = builder.config("spark.jars", SparkleTestCase.root(jar_path))
 
-        spark = config.enableHiveSupport().getOrCreate()
-        sql_context: SQLContext = SQLContext.getOrCreate(spark.sparkContext)
-        sql_context.setConf("hive.exec.dynamic.partition", "true")
-        sql_context.setConf("hive.exec.dynamic.partition.mode", "nonstrict")
+        spark = builder.enableHiveSupport().getOrCreate()
+        spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
+        spark.sparkContext.setLogLevel("ERROR")
         return spark
 
     @staticmethod
@@ -99,8 +96,7 @@ class SparkleTestCase(unittest.TestCase, ABC):
 
     @staticmethod
     def _create_tmp_warehouse_dir():
-        timestmp = datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S-%f')
-        warehouse_tmp_dir = SparkleTestCase.root("target/warehouse/{}".format(timestmp))
+        warehouse_tmp_dir = os.path.join(tempfile.mkdtemp(), "sparkle-test/")
         return warehouse_tmp_dir
 
     @staticmethod
