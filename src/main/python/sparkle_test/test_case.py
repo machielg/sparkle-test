@@ -13,6 +13,13 @@ from pyspark.sql import SparkSession
 
 
 class SparkleTestCase(unittest.TestCase, ABC):
+    spark = ...
+    log = ...
+    jars = []
+    options = dict()
+    repositories = []
+    packages = []
+
     """
         This base class creates spark session which you can use in your unit tests.
         Spark parameters are tuned for local runs.
@@ -23,7 +30,7 @@ class SparkleTestCase(unittest.TestCase, ABC):
     @classmethod
     def setUpClass(cls):
         warnings.simplefilter("ignore", ResourceWarning)  # ignore socket warnings
-        cls.spark = cls.createSparkSession(cls.jar_path())
+        cls.spark = cls._createSparkSession()
         cls.setup_class()
 
     def setUp(self):
@@ -38,11 +45,7 @@ class SparkleTestCase(unittest.TestCase, ABC):
         SQLContext(self.spark.sparkContext).clearCache()
 
     @classmethod
-    def jar_path(cls) -> str:
-        return ""
-
-    @staticmethod
-    def createSparkSession(jar_path: str = None):
+    def _createSparkSession(cls):
 
         warehouse_tmp_dir = SparkleTestCase._create_tmp_warehouse_dir()
 
@@ -54,17 +57,34 @@ class SparkleTestCase(unittest.TestCase, ABC):
             config("spark.driver.extraJavaOptions", "-Dderby.system.home={}".format(warehouse_tmp_dir)). \
             config("spark.ui.enabled", "false"). \
             config("spark.default.parallelism", 1). \
-            config("spark.executor.cores", 1). \
-            config("spark.executor.instances", 1). \
-            config("spark.sql.shuffle.partitions", 1)
+            config("spark.sql.shuffle.partitions", 1). \
+            config("spark.sql.sources.partitionOverwriteMode", "dynamic")
 
-        if jar_path and len(jar_path) > 0:
-            builder = builder.config("spark.jars", SparkleTestCase.root(jar_path))
+        if cls.packages:
+            builder = builder.config('spark.jars.packages', ",".join(cls.packages))
 
+        if cls.repositories:
+            builder = builder.config('spark.jars.repositories', ",".join(cls.repositories))
+
+        if cls.jars:
+            builder = builder.config("spark.jars", ",".join([SparkleTestCase.root(j) for j in cls.jars]))
+
+        for k in cls.options:
+            builder = builder.config(k, cls.options[k])
+
+        session = SparkSession._instantiatedSession  # type: SparkSession
+        ignorable = ['spark.sql.warehouse.dir', 'spark.driver.extraJavaOptions']
+        if session:
+            for key, value in builder._options.items():
+                exist_val = session.conf.get(key, None)
+                if exist_val != value and key not in ignorable:
+                    print("Not same val in current session {} {} {}".format(key, value, exist_val))
         spark = builder.enableHiveSupport().getOrCreate()
-        spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
         spark.sparkContext.setLogLevel("ERROR")
         return spark
+
+    def _get_logger(session: SparkSession):
+        return session._jvm.org.apache.log4j.Logger.getLogger(__name__)
 
     @staticmethod
     def remove(path: str):
