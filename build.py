@@ -4,7 +4,6 @@ use_plugin("python.core")
 use_plugin("python.unittest")
 use_plugin("python.install_dependencies")
 use_plugin("python.flake8")
-# use_plugin("python.coverage")
 use_plugin("python.distutils")
 
 name = "sparkle-test"
@@ -13,11 +12,11 @@ description = """
 Unit testing in Spark is made easier with sparkle-test, the settings are tuned for performance and your unit tests
 don't leave any files in your workspace. There is one convenience method for asserting dataframe equality.
 """
-default_task = "publish"
-version = "1.0.0"
+default_task = ["clean", "analyze", "publish"]
+version = "1.0.1"
 
 url = "https://github.com/machielg/sparkle-test/"
-licence = "GPLv3+"
+license = "GPLv3+"
 
 
 authors = [Author("Machiel Keizer Groeneveld", "machielg@gmail.com")]
