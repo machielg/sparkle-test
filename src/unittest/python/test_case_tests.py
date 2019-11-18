@@ -1,5 +1,7 @@
 import pathlib
 
+from pyspark.sql.types import LongType
+
 from sparkle_test import SparkleTestCase
 
 
@@ -27,3 +29,23 @@ class SparkleTestCaseTest(SparkleTestCase):
 
         log_files = [f for f in pathlib.Path(path).rglob('*.log') if target_dir not in f.parents]
         return log_files
+
+    def test_random_df(self):
+        df = self.randomDF()
+        self.assertIsNotNone(df)
+        self.assertGreaterEqual(df.count(), 1)
+        self.assertGreaterEqual(len(df.columns), 1)
+
+    def test_random_df_with_cols(self):
+        df = self.randomDF("a", "b")
+        self.assertEqual(2, len(df.columns))
+        self.assertEqual("a", df.columns[0])
+        self.assertEqual("b", df.columns[1])
+        self.assertGreaterEqual(df.count(), 1)
+
+    def test_random_df_with_cols_and_type(self):
+        df = self.randomDF("a:bigint")
+        self.assertEqual(1, len(df.columns))
+        self.assertEqual("a", df.columns[0])
+        self.assertEqual(LongType(), df.schema.fields[0].dataType)
+        self.assertGreaterEqual(df.count(), 1)

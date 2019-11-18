@@ -13,7 +13,7 @@ Unit testing in Spark is made easier with sparkle-test, the settings are tuned f
 don't leave any files in your workspace. There is one convenience method for asserting dataframe equality.
 """
 default_task = ["clean", "analyze", "publish"]
-version = "1.0.1"
+version = "1.1.0.dev"
 
 url = "https://github.com/machielg/sparkle-test/"
 license = "GPLv3+"
