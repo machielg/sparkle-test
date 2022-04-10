@@ -10,7 +10,7 @@ from inspect import signature
 from random import choice, randint
 
 import pyspark
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 # noinspection PyProtectedMember
 from pyspark import SQLContext
 from pyspark.sql import SparkSession, DataFrame
@@ -101,7 +101,7 @@ class SparkleTestCase(unittest.TestCase, ABC):
         pass
 
     def tearDown(self):
-        SQLContext(self.spark.sparkContext).clearCache()
+        self.spark.sql("CLEAR CACHE")
 
     @classmethod
     def _createSparkSession(cls):
